@@ -1,4 +1,6 @@
 # uDMX Artnet Bridge
+[![Build Status](https://travis-ci.org/maxjoehnk/node-udmx-artnet-bridge.svg?branch=master)](https://travis-ci.org/maxjoehnk/node-udmx-artnet-bridge)
+
 A Node.JS based bridge from uDMX to an Artnet Universe.
 
 # Usage
