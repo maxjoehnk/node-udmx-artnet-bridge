@@ -26,8 +26,10 @@ const init = async() => {
     });
     const connect = () => {
         try {
+            d('Connecting to dongle');
             device.connect();
         }catch(err) {
+            d('Connection failed');
             setTimeout(() => connect(), 1000);
         }
     };
@@ -37,6 +39,7 @@ const init = async() => {
             device.set(i + 1, buffer[i]);
         }
     });
+    connect();
     Server.listen(config.artnet.port, ({ data, universe }, peer) => {
         if (universe !== config.artnet.universe) {
             return;
