@@ -1,19 +1,18 @@
 import * as toml from 'toml';
 import * as yaml from 'js-yaml';
-import { readJson, readFile } from 'fs-extra';
+import { readFile, readJson } from 'fs-extra';
 import { parse, resolve } from 'path';
 import { cwd } from 'process';
 
 export interface Config {
     timeout: number;
     udmx?: {
-        vendorId: number;
-        deviceId: number;
+        vendorId: number; deviceId: number;
     };
     artnet: {
-        port: number;
-        universe: number;
+        port: number; universe: number;
     };
+    health?: number | false;
 }
 
 export const defaults: Config = {
@@ -25,20 +24,21 @@ export const defaults: Config = {
     artnet: {
         port: 6454,
         universe: 0
-    }
+    },
+    health: false
 };
 
-const readToml = async(path: string): Promise<Config> => {
+const readToml = async (path: string): Promise<Config> => {
     const file = await readFile(path, 'utf8');
     return toml.parse(file);
 };
 
-const readYaml = async(path: string): Promise<Config> => {
+const readYaml = async (path: string): Promise<Config> => {
     const file = await readFile(path, 'utf8');
     return <Config>yaml.safeLoad(file);
 };
 
-export const read = async(filename: string): Promise<Config> => {
+export const read = async (filename: string): Promise<Config> => {
     const path = resolve(cwd(), filename);
     const { ext } = parse(path);
     let config: Config;
@@ -58,9 +58,10 @@ export const read = async(filename: string): Promise<Config> => {
     }
     validate(config);
     return {
-        timeout: config.timeout != undefined ? config.timeout : defaults.timeout,
-        udmx: Object.assign({}, defaults.udmx, config.udmx),
-        artnet: Object.assign({}, defaults.artnet, config.artnet)
+        timeout: config.timeout != null ? config.timeout : defaults.timeout,
+        udmx: { ...defaults.udmx, ...config.udmx },
+        artnet: { ...defaults.artnet, ...config.artnet },
+        health: config.health != null ? config.health : defaults.health
     };
 };
 

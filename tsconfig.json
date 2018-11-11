@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es5",
+    "target": "es6",
     "sourceMap": true,
     "outDir": "lib",
     "lib": ["es2015"],
-    "declaration": true
+    "declaration": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "types"
+    ]
   },
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "**/*.spec.ts",

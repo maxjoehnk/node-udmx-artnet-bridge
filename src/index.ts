@@ -3,6 +3,7 @@ import * as uDMX from 'udmx';
 import * as yargs from 'yargs';
 import { read, defaults } from './config';
 import * as debug from 'debug';
+import { setup as healthApiSetup, emit, MessageType, ArtnetPacketPayload } from './health';
 
 const d = debug('udmx-artnet-bridge');
 
@@ -18,6 +19,10 @@ const init = async() => {
         config = await read(c);
     }
 
+    if (config.health) {
+        healthApiSetup(config);
+    }
+
     const buffer = new Array(512).fill(0);
 
     const device = new uDMX({
@@ -30,17 +35,24 @@ const init = async() => {
             device.connect();
         }catch(err) {
             d('Connection failed');
+            emit(MessageType.uDMXDisconnected);
             setTimeout(() => connect(), 1000);
         }
     };
     device.on('connected', () => {
         console.log('Connected to uDMX dongle');
+        emit(MessageType.uDMXConnected);
         for (let i = 0; i < 512; i++) {
             device.set(i + 1, buffer[i]);
         }
     });
     connect();
     Server.listen(config.artnet.port, ({ data, universe }, peer) => {
+        emit(MessageType.ArtnetPacket, <ArtnetPacketPayload>{
+            data,
+            universe,
+            peer
+        });
         if (universe !== config.artnet.universe) {
             return;
         }
